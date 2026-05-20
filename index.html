@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Traveloop – Plan Your Journey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal auth-modal">
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">Log In</button>
+        <button class="auth-tab" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+      <div id="loginForm">
+        <h2 class="modal-title">Welcome back</h2>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" />
+        </div>
+        <a href="#" class="forgot-link">Forgot password?</a>
+        <button class="btn-primary full" onclick="window.location.href='login.html'">Log In</button>
+        <div class="divider"><span>or</span></div>
+        <button class="btn-social"><img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18"/> Continue with Google</button>
+      </div>
+      <div id="signupForm" style="display:none">
+        <h2 class="modal-title">Create account</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" placeholder="Alex" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" placeholder="Smith" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" />
+        </div>
+        <button class="btn-primary full" onclick="window.location.href='login.html'">Create Account</button>
+        <div class="divider"><span>or</span></div>
+        <button class="btn-social"><img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18"/> Continue with Google</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE TRIP MODAL -->
+  <div class="modal-overlay" id="createTripModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('createTripModal')">✕</button>
+      <h2 class="modal-title">✈️ Plan a New Trip</h2>
+      <div class="form-group">
+        <label>Trip Name</label>
+        <input type="text" placeholder="e.g. Europe Summer 2025" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" />
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea placeholder="A quick trip to explore..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Add Cities / Stops</label>
+        <div class="city-tags" id="cityTags"></div>
+        <div class="city-input-row">
+          <input type="text" id="cityInput" placeholder="Type a city name..." onkeydown="addCityOnEnter(event)" />
+          <button class="btn-add" onclick="addCity()">+ Add</button>
+        </div>
+      </div>
+      <button class="btn-primary full" onclick="saveTrip()">Save Trip 🗺️</button>
+    </div>
+  </div>
+
+  <!-- MY TRIPS MODAL -->
+  <div class="modal-overlay" id="myTripsModal">
+    <div class="modal wide-modal">
+      <button class="modal-close" onclick="closeModal('myTripsModal')">✕</button>
+      <h2 class="modal-title">🧳 My Trips</h2>
+      <div class="trip-list" id="tripList">
+        <div class="empty-state">No trips yet. Start planning your first adventure!</div>
+      </div>
+      <button class="btn-primary" onclick="closeModal('myTripsModal'); openModal('createTripModal')">+ Plan New Trip</button>
+    </div>
+  </div>
+
+  <!-- ITINERARY VIEW MODAL -->
+  <div class="modal-overlay" id="itineraryModal">
+    <div class="modal wide-modal">
+      <button class="modal-close" onclick="closeModal('itineraryModal')">✕</button>
+      <h2 class="modal-title">🗓️ Itinerary View</h2>
+      <div id="itineraryContent">
+        <div class="empty-state">Select a trip from My Trips to view its itinerary.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKING CHECKLIST MODAL -->
+  <div class="modal-overlay" id="packingModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('packingModal')">✕</button>
+      <h2 class="modal-title">🎒 Packing Checklist</h2>
+      <div class="checklist-categories">
+        <div class="checklist-section">
+          <h4>📄 Documents</h4>
+          <div class="checklist-items" id="docItems">
+            <label class="check-item"><input type="checkbox"/> Passport</label>
+            <label class="check-item"><input type="checkbox"/> Visa</label>
+            <label class="check-item"><input type="checkbox"/> Travel Insurance</label>
+            <label class="check-item"><input type="checkbox"/> Flight Tickets</label>
+          </div>
+        </div>
+        <div class="checklist-section">
+          <h4>👕 Clothing</h4>
+          <div class="checklist-items" id="clothingItems">
+            <label class="check-item"><input type="checkbox"/> T-Shirts</label>
+            <label class="check-item"><input type="checkbox"/> Jeans / Pants</label>
+            <label class="check-item"><input type="checkbox"/> Jacket</label>
+            <label class="check-item"><input type="checkbox"/> Comfortable Shoes</label>
+          </div>
+        </div>
+        <div class="checklist-section">
+          <h4>🔌 Electronics</h4>
+          <div class="checklist-items" id="electronicsItems">
+            <label class="check-item"><input type="checkbox"/> Phone + Charger</label>
+            <label class="check-item"><input type="checkbox"/> Power Bank</label>
+            <label class="check-item"><input type="checkbox"/> Adapter / Converter</label>
+            <label class="check-item"><input type="checkbox"/> Earphones</label>
+          </div>
+        </div>
+      </div>
+      <div class="add-item-row">
+        <select id="itemCategory">
+          <option value="docItems">Documents</option>
+          <option value="clothingItems">Clothing</option>
+          <option value="electronicsItems">Electronics</option>
+        </select>
+        <input type="text" id="newPackItem" placeholder="Add item..." />
+        <button class="btn-add" onclick="addPackingItem()">+</button>
+      </div>
+      <button class="btn-secondary full" onclick="resetChecklist()">Reset All</button>
+    </div>
+  </div>
+
+  <!-- NOTES MODAL -->
+  <div class="modal-overlay" id="notesModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('notesModal')">✕</button>
+      <h2 class="modal-title">📝 Trip Notes</h2>
+      <div class="notes-list" id="notesList"></div>
+      <div class="note-input-area">
+        <input type="text" id="noteTitle" placeholder="Note title..." />
+        <textarea id="noteBody" placeholder="Write your note, reminder, or check-in info..."></textarea>
+        <button class="btn-primary full" onclick="addNote()">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARED ITINERARY MODAL -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('shareModal')">✕</button>
+      <h2 class="modal-title">🔗 Share Your Itinerary</h2>
+      <p class="share-desc">Share your trip plan with friends or the world!</p>
+      <div class="share-url-box">
+        <span id="shareUrl">https://traveloop.app/trip/abc123</span>
+        <button class="btn-copy" onclick="copyShareUrl()">Copy</button>
+      </div>
+      <div class="social-share-btns">
+        <button class="btn-social-share whatsapp">📱 WhatsApp</button>
+        <button class="btn-social-share twitter">🐦 Twitter</button>
+        <button class="btn-social-share email">✉️ Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT US MODAL -->
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('contactModal')">✕</button>
+      <h2 class="modal-title">📬 Contact Us</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea placeholder="How can we help?"></textarea>
+      </div>
+      <button class="btn-primary full">Send Message</button>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+      <h2 class="modal-title">👤 Edit Profile</h2>
+      <div class="avatar-upload">
+        <div class="avatar-circle" id="profileAvatar">A</div>
+        <button class="btn-text">Change photo</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="profileFirst" value="Alex" />
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="profileLast" value="Smith" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="profileEmail" value="alex@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Language</label>
+        <select>
+          <option>English</option>
+          <option>Hindi</option>
+          <option>Spanish</option>
+          <option>French</option>
+        </select>
+      </div>
+      <button class="btn-primary full" onclick="saveProfile()">Save Changes</button>
+      <button class="btn-danger full" onclick="confirmDelete()">Delete Account</button>
+    </div>
+  </div>
+
+  <!-- CITY SEARCH MODAL -->
+  <div class="modal-overlay" id="citySearchModal">
+    <div class="modal wide-modal">
+      <button class="modal-close" onclick="closeModal('citySearchModal')">✕</button>
+      <h2 class="modal-title">🌍 Explore Cities</h2>
+      <div class="search-bar-inline">
+        <input type="text" id="citySearchInput" placeholder="Search cities..." oninput="filterCities()" />
+        <select id="regionFilter" onchange="filterCities()">
+          <option value="">All Regions</option>
+          <option value="Europe">Europe</option>
+          <option value="Asia">Asia</option>
+          <option value="Americas">Americas</option>
+          <option value="Africa">Africa</option>
+          <option value="Oceania">Oceania</option>
+        </select>
+      </div>
+      <div class="city-search-grid" id="citySearchGrid"></div>
+    </div>
+  </div>
+
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-left">
+      <div class="logo">🌍 traveloop</div>
+    </div>
+    <div class="nav-center" id="navCenter">
+      <div class="nav-search-pill" onclick="scrollToSearch()">
+        <span>Where to?</span>
+        <div class="pill-divider"></div>
+        <span>Any week</span>
+        <div class="pill-divider"></div>
+        <span class="pill-search-btn">🔍</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-menu-btn" onclick="toggleMenu()">
+        <span class="hamburger-icon">☰</span>
+        <div class="profile-avatar" id="navAvatar">A</div>
+      </div>
+
+      <!-- DROPDOWN MENU -->
+      <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-section" id="loggedInMenu" style="display:none">
+          <button class="dropdown-item bold" onclick="openModal('profileModal'); closeDropdown()">👤 Edit Profile</button>
+          <button class="dropdown-item" onclick="openModal('myTripsModal'); closeDropdown()">🧳 My Trips</button>
+          <button class="dropdown-item" onclick="openModal('itineraryModal'); closeDropdown()">🗓️ Itinerary View</button>
+          <button class="dropdown-item" onclick="openModal('packingModal'); closeDropdown()">🎒 Packing Checklist</button>
+          <button class="dropdown-item" onclick="openModal('notesModal'); closeDropdown()">📝 Trip Notes</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="openModal('contactModal'); closeDropdown()">📬 Contact Us</button>
+          <button class="dropdown-item red" onclick="handleLogout()">🚪 Log Out</button>
+        </div>
+        <div class="dropdown-section" id="loggedOutMenu">
+          <button class="dropdown-item bold" onclick="window.location.href='login.html'">Sign Up</button>
+          <button class="dropdown-item" onclick="window.location.href='login.html'">Log In</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="openModal('contactModal'); closeDropdown()">📬 Contact Us</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="heroSection">
+    <div class="hero-bg">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">Where do you<br/><em>want to go?</em></h1>
+      <p class="hero-subtitle">Plan multi-city trips, discover destinations, and share your journeys.</p>
+
+      <!-- AIRBNB-STYLE SEARCH BAR -->
+      <div class="hero-search-bar" id="heroSearch">
+        <div class="search-field" onclick="openModal('citySearchModal')">
+          <label>Destination</label>
+          <span class="search-value" id="destValue">Search cities</span>
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <label>Check in</label>
+          <input type="date" class="date-input" id="checkIn" />
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <label>Check out</label>
+          <input type="date" class="date-input" id="checkOut" />
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <label>Travelers</label>
+          <input type="number" class="num-input" id="travelers" value="1" min="1" max="20" />
+        </div>
+        <button class="search-btn" onclick="handleSearch()">🔍</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPULAR DESTINATIONS -->
+  <section class="section destinations-section">
+    <h2 class="section-title">Popular Destinations</h2>
+    <p class="section-sub">Explore trending cities loved by travelers worldwide</p>
+    <div class="destinations-grid" id="destinationsGrid"></div>
+  </section>
+
+  <!-- PLAN CTA SECTION -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to start your adventure?</h2>
+      <p>Create a multi-city itinerary in minutes and share it with the world.</p>
+      <button class="btn-primary large" onclick="requireLogin(() => openModal('createTripModal'))">✈️ Plan My Trip</button>
+    </div>
+  </section>
+
+  <!-- RECENT TRIPS (shown after login) -->
+  <section class="section recent-trips-section" id="recentTripsSection" style="display:none">
+    <h2 class="section-title">Your Recent Trips</h2>
+    <div class="trip-cards-row" id="recentTripCards"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span class="logo">🌍 traveloop</span>
+        <p>Making travel planning as exciting as the journey itself.</p>
+      </div>
+      <div class="footer-links">
+        <button onclick="openModal('contactModal')">Contact Us</button>
+        <button onclick="requireLogin(() => openModal('myTripsModal'))">My Trips</button>
+        <button onclick="requireLogin(() => openModal('packingModal'))">Packing List</button>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Traveloop. Built with ❤️ for Odoo Hackathon.</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

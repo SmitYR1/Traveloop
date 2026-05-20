@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Traveloop – Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #FF385C;
+      --primary-dark: #D93025;
+      --dark: #1a1a2e;
+      --font: 'DM Sans', sans-serif;
+      --display: 'Playfair Display', serif;
+    }
+    body {
+      font-family: var(--font);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: #0d0d1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== BG ===== */
+    .bg-canvas { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+    .aurora { position: absolute; inset: 0; }
+    .aurora-wave {
+      position: absolute; width: 200%; height: 200%;
+      border-radius: 40%; opacity: 0.07;
+      animation: auroSpin linear infinite;
+    }
+    .aurora-wave:nth-child(1) { background:#FF385C; top:-50%; left:-50%; animation-duration:18s; }
+    .aurora-wave:nth-child(2) { background:#6C63FF; top:-60%; left:-30%; animation-duration:24s; animation-direction:reverse; opacity:0.05; }
+    .aurora-wave:nth-child(3) { background:#00D2FF; top:-40%; left:-60%; animation-duration:30s; opacity:0.04; }
+    .aurora-wave:nth-child(4) { background:#FFB347; top:-55%; left:-20%; animation-duration:20s; animation-direction:reverse; opacity:0.04; }
+    @keyframes auroSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    .stars { position:absolute; inset:0; }
+    .star { position:absolute; background:white; border-radius:50%; animation:twinkle ease-in-out infinite; }
+    @keyframes twinkle { 0%,100%{opacity:0.1;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.4)} }
+
+    .floaties { position:absolute; inset:0; pointer-events:none; }
+    .floaty { position:absolute; font-size:1.6rem; opacity:0.15; animation:floatUp linear infinite; }
+    @keyframes floatUp {
+      0%   { transform:translateY(0) rotate(0deg); opacity:0.1; }
+      50%  { transform:translateY(-30px) rotate(8deg); opacity:0.22; }
+      100% { transform:translateY(0) rotate(0deg); opacity:0.1; }
+    }
+
+    .shooters { position:absolute; inset:0; overflow:hidden; }
+    .shooter {
+      position:absolute; height:1.5px;
+      background:linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+      border-radius:2px; animation:shoot linear infinite; opacity:0;
+    }
+    @keyframes shoot {
+      0%   { transform:translateX(-200px) translateY(0) rotate(-25deg); opacity:0; }
+      10%  { opacity:1; }
+      90%  { opacity:1; }
+      100% { transform:translateX(120vw) translateY(50vh) rotate(-25deg); opacity:0; }
+    }
+
+    /* ===== LAYOUT ===== */
+    .login-wrapper {
+      position:relative; z-index:10;
+      width:100%; max-width:460px;
+      padding:20px;
+      display:flex; flex-direction:column; align-items:center;
+    }
+
+    /* ===== BEAR ON PLANE ===== */
+    .mascot-wrap {
+      width:260px; cursor:pointer; user-select:none;
+      margin-bottom:4px;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+    }
+    .mascot-svg {
+      width:100%; height:auto;
+      animation: planeFloat 3s ease-in-out infinite;
+    }
+    @keyframes planeFloat {
+      0%,100% { transform:translateY(0) rotate(-1deg); }
+      50%      { transform:translateY(-12px) rotate(1deg); }
+    }
+    .mascot-svg.excited { animation:bearExcited 0.35s ease-in-out 4, planeFloat 3s ease-in-out 1.4s infinite; }
+    @keyframes bearExcited {
+      0%   { transform:rotate(0) scale(1); }
+      25%  { transform:rotate(-8deg) scale(1.08); }
+      75%  { transform:rotate(8deg) scale(1.08); }
+      100% { transform:rotate(0) scale(1); }
+    }
+    .mascot-svg.happy { animation:bearHappy 0.6s ease-in-out, planeFloat 3s ease-in-out 0.6s infinite; }
+    @keyframes bearHappy {
+      0%   { transform:scale(1) rotate(0); }
+      30%  { transform:scale(1.12) rotate(-7deg); }
+      60%  { transform:scale(1.14) rotate(7deg); }
+      100% { transform:scale(1) rotate(0); }
+    }
+    .mascot-svg.typing { animation:bearBob 0.5s ease-in-out infinite alternate; }
+    @keyframes bearBob {
+      0%   { transform:translateY(0) rotate(-2deg); }
+      100% { transform:translateY(-6px) rotate(2deg); }
+    }
+
+    /* Propeller spin on mascot SVG */
+    #propGroup { animation:propSpin 0.4s linear infinite; transform-origin:36px 90px; }
+    @keyframes propSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+    /* Wave arm */
+    #waveArm { animation:waveAnim 0.7s ease-in-out infinite alternate; transform-origin:128px 74px; }
+    @keyframes waveAnim { 0%{transform:rotate(0)} 100%{transform:rotate(-28deg)} }
+
+    /* ===== SPEECH BUBBLE ===== */
+    .bubble-wrap { min-height:44px; display:flex; justify-content:center; margin-bottom:12px; }
+    .speech-bubble {
+      background:#1a1a2e; color:white;
+      padding:9px 16px; border-radius:18px;
+      font-size:0.85rem; font-weight:500;
+      max-width:280px; text-align:center; line-height:1.4;
+      position:relative; animation:bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .speech-bubble::after {
+      content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+      border-left:8px solid transparent; border-right:8px solid transparent;
+      border-top:10px solid #1a1a2e;
+    }
+    @keyframes bubbleIn { from{opacity:0;transform:scale(0.7) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+    /* ===== CARD ===== */
+    .login-card {
+      background:rgba(255,255,255,0.97);
+      border-radius:28px; padding:36px 36px 32px;
+      width:100%;
+      box-shadow:0 30px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      animation:cardIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(40px) scale(0.92)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    .brand { text-align:center; margin-bottom:22px; }
+    .brand-logo { font-family:var(--display); font-size:1.8rem; font-weight:700; color:var(--primary); letter-spacing:-1px; }
+    .brand-tagline { font-size:0.8rem; color:#999; margin-top:2px; }
+
+    /* Tabs */
+    .tabs { display:flex; background:#f5f5f5; border-radius:14px; padding:4px; margin-bottom:22px; }
+    .tab {
+      flex:1; border:none; background:none; padding:10px;
+      border-radius:11px; font-family:var(--font); font-size:0.88rem;
+      font-weight:500; color:#888; cursor:pointer; transition:all 0.25s;
+    }
+    .tab.active { background:white; color:var(--dark); font-weight:700; box-shadow:0 2px 8px rgba(0,0,0,0.1); transform:scale(1.02); }
+
+    /* Form */
+    .form-group { margin-bottom:13px; }
+    .form-group label { display:block; font-size:0.73rem; font-weight:700; color:#444; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; }
+    .form-group input {
+      width:100%; padding:12px 15px;
+      border:1.5px solid #e8e8e8; border-radius:12px;
+      font-family:var(--font); font-size:0.92rem; color:#1a1a1a;
+      outline:none; background:#fafafa;
+      transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(255,56,92,0.12); background:white; }
+    .form-row { display:flex; gap:10px; }
+    .form-row .form-group { flex:1; }
+
+    .forgot { display:block; text-align:right; font-size:0.8rem; color:var(--primary); text-decoration:none; font-weight:500; margin-bottom:16px; }
+
+    /* Error message */
+    .error-msg { background:#fff0f2; color:#D93025; border-radius:10px; padding:10px 14px; font-size:0.85rem; margin-bottom:12px; display:none; font-weight:500; }
+    .error-msg.show { display:block; }
+
+    /* Buttons */
+    .btn-main {
+      width:100%; padding:14px; border:none; border-radius:14px;
+      background:linear-gradient(135deg,#FF385C,#D93025);
+      color:white; font-family:var(--font); font-size:1rem; font-weight:700;
+      cursor:pointer; transition:transform 0.15s, box-shadow 0.2s;
+      position:relative; overflow:hidden; letter-spacing:0.3px;
+    }
+    .btn-main:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(255,56,92,0.4); }
+    .btn-main:active { transform:scale(0.98); }
+    .btn-main:disabled { opacity:0.7; cursor:not-allowed; transform:none; }
+
+    .divider { display:flex; align-items:center; gap:12px; margin:16px 0; font-size:0.8rem; color:#bbb; }
+    .divider::before,.divider::after { content:''; flex:1; height:1px; background:#e8e8e8; }
+
+    .btn-google {
+      width:100%; padding:12px; border:1.5px solid #e8e8e8; border-radius:14px;
+      background:white; font-family:var(--font); font-size:0.88rem; font-weight:500;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+      color:#333; transition:border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-google:hover { border-color:#bbb; box-shadow:0 4px 12px rgba(0,0,0,0.08); transform:translateY(-1px); }
+
+    /* Password strength */
+    .strength-bar { display:flex; gap:4px; margin-top:6px; }
+    .strength-seg { flex:1; height:3px; border-radius:3px; background:#eee; transition:background 0.3s; }
+    .strength-label { font-size:0.72rem; color:#999; margin-top:4px; }
+
+    /* Back link */
+    .back-link { text-align:center; margin-top:18px; }
+    .back-link a { color:rgba(255,255,255,0.65); font-size:0.83rem; text-decoration:none; transition:color 0.2s; }
+    .back-link a:hover { color:white; }
+
+    /* Confetti */
+    .confetti-piece {
+      position:fixed; pointer-events:none; z-index:9999;
+      animation:confettiFall 1.2s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform:translateY(0) rotate(0) scale(1); opacity:1; }
+      100% { transform:translateY(280px) rotate(720deg) scale(0.5); opacity:0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-canvas">
+  <div class="aurora">
+    <div class="aurora-wave"></div><div class="aurora-wave"></div>
+    <div class="aurora-wave"></div><div class="aurora-wave"></div>
+  </div>
+  <div class="stars"   id="starsContainer"></div>
+  <div class="floaties" id="floatiesContainer"></div>
+  <div class="shooters" id="shootersContainer"></div>
+</div>
+
+<div class="login-wrapper">
+
+  <!-- BEAR ON PLANE MASCOT -->
+  <div class="mascot-wrap" onclick="bearDance()" title="Click Bruno!">
+    <svg class="mascot-svg" id="mascotSvg" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- PLANE BODY -->
+      <ellipse cx="100" cy="118" rx="78" ry="16" fill="#F0F0F0" stroke="#CCCCCC" stroke-width="0.8"/>
+      <ellipse cx="100" cy="112" rx="76" ry="10" fill="#FFFFFF" stroke="#DDDDDD" stroke-width="0.6"/>
+      <!-- Nose -->
+      <path d="M24 118 Q14 118 10 115 Q6 111 22 107 Q26 111 26 114 Z" fill="#EBEBEB" stroke="#CCC" stroke-width="0.6"/>
+      <!-- Tail -->
+      <path d="M174 118 Q184 118 188 115 Q192 111 178 107 Q174 111 174 114 Z" fill="#EBEBEB" stroke="#CCC" stroke-width="0.6"/>
+      <!-- Tail fin -->
+      <path d="M168 118 Q171 100 178 88 Q182 90 180 118 Z" fill="#EBEBEB" stroke="#CCC" stroke-width="0.7"/>
+      <!-- Red stripe -->
+      <path d="M26 121 Q100 124 174 121" stroke="#FF385C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Windows -->
+      <rect x="60"  y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <rect x="75"  y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <rect x="90"  y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <rect x="105" y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <rect x="120" y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <rect x="135" y="108" width="8" height="6" rx="2" fill="#B8D4F8" stroke="#99BBEE" stroke-width="0.5"/>
+      <!-- Wings -->
+      <path d="M70 118 Q80 100 130 96 Q142 94 148 116 Q115 114 70 118 Z" fill="#E2E2E2" stroke="#CCC" stroke-width="0.7"/>
+      <!-- Wing stripe -->
+      <path d="M82 113 Q106 105 138 102" stroke="#FF385C" stroke-width="1.5" fill="none" opacity="0.6"/>
+      <!-- Back wing -->
+      <path d="M150 116 Q158 104 176 100 Q178 108 174 116 Z" fill="#E2E2E2" stroke="#CCC" stroke-width="0.6"/>
+      <!-- Engine -->
+      <ellipse cx="88" cy="126" rx="14" ry="5" fill="#D5D5D5" stroke="#BBB" stroke-width="0.6"/>
+      <ellipse cx="88" cy="124" rx="14" ry="4" fill="#E8E8E8" stroke="#CCC" stroke-width="0.5"/>
+      <!-- TRAVELOOP text -->
+      <text x="100" y="132" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="6" font-weight="700" fill="#FF385C" letter-spacing="1.5">TRAVELOOP</text>
+
+      <!-- Propeller -->
+      <circle cx="36" cy="90" r="4" fill="#CCC" stroke="#AAA" stroke-width="0.6"/>
+      <g id="propGroup">
+        <ellipse cx="36" cy="72"  rx="3" ry="14" fill="#999"/>
+        <ellipse cx="36" cy="108" rx="3" ry="14" fill="#999"/>
+        <ellipse cx="20" cy="90"  rx="14" ry="3" fill="#AAAAAA"/>
+        <ellipse cx="52" cy="90"  rx="14" ry="3" fill="#AAAAAA"/>
+      </g>
+
+      <!-- ======= BEAR ======= -->
+      <!-- Ears -->
+      <circle cx="82"  cy="42" r="9"  fill="#C8874A"/>
+      <circle cx="82"  cy="42" r="5.5" fill="#E8A06A"/>
+      <circle cx="118" cy="42" r="9"  fill="#C8874A"/>
+      <circle cx="118" cy="42" r="5.5" fill="#E8A06A"/>
+
+      <!-- Head -->
+      <ellipse cx="100" cy="60" rx="28" ry="27" fill="#C8874A"/>
+      <ellipse cx="100" cy="68" rx="18" ry="13" fill="#E8A06A" opacity="0.7"/>
+
+      <!-- Pilot hat -->
+      <ellipse cx="100" cy="36" rx="30" ry="7"  fill="#1a1a2e"/>
+      <rect    x="72"  y="26" width="56" height="13" rx="6" fill="#2B2B4E"/>
+      <ellipse cx="100" cy="26" rx="28" ry="7"  fill="#1a1a2e"/>
+      <rect    x="72"  y="36" width="56" height="3"  rx="1.5" fill="#FFD700"/>
+      <ellipse cx="100" cy="26" rx="10" ry="4"  fill="#FFD700"/>
+      <text x="100" y="29" text-anchor="middle" font-family="sans-serif" font-size="5" fill="#1a1a2e" font-weight="bold">✈</text>
+
+      <!-- Eyes -->
+      <ellipse cx="89"  cy="57" rx="7" ry="8" fill="white"/>
+      <ellipse cx="90"  cy="58" rx="4.5" ry="5.5" fill="#2a1a0a"/>
+      <circle  cx="91.5" cy="56" r="1.5" fill="white"/>
+      <ellipse cx="111" cy="57" rx="7" ry="8" fill="white"/>
+      <ellipse cx="112" cy="58" rx="4.5" ry="5.5" fill="#2a1a0a"/>
+      <circle  cx="113.5" cy="56" r="1.5" fill="white"/>
+
+      <!-- Eyebrows -->
+      <path d="M83 50 Q89 47 95 50" stroke="#6B3A10" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M105 50 Q111 47 117 50" stroke="#6B3A10" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+      <!-- Nose -->
+      <ellipse cx="100" cy="67" rx="8" ry="6"  fill="#E8A06A"/>
+      <ellipse cx="100" cy="67" rx="5" ry="4"  fill="#7A3B10"/>
+      <ellipse cx="98"  cy="66" rx="1.5" ry="1" fill="white" opacity="0.5"/>
+
+      <!-- Mouth -->
+      <path d="M91 73 Q100 82 109 73" stroke="#7A3B10" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+      <!-- Cheeks -->
+      <ellipse cx="80"  cy="68" rx="9" ry="6" fill="#FF9999" opacity="0.4"/>
+      <ellipse cx="120" cy="68" rx="9" ry="6" fill="#FF9999" opacity="0.4"/>
+
+      <!-- Body / jacket -->
+      <ellipse cx="100" cy="102" rx="28" ry="20" fill="#1a1a2e"/>
+      <!-- Lapels -->
+      <path d="M100 85 L90 92 L93 104 L100 99 L107 104 L110 92 Z" fill="#2B2B4E"/>
+      <!-- Buttons -->
+      <circle cx="100" cy="96"  r="2.5" fill="#FFD700"/>
+      <circle cx="100" cy="104" r="2.5" fill="#FFD700"/>
+      <!-- Epaulettes -->
+      <rect x="73" y="84" width="14" height="5" rx="2.5" fill="#FFD700"/>
+      <rect x="113" y="84" width="14" height="5" rx="2.5" fill="#FFD700"/>
+      <line x1="75" y1="86.5" x2="85" y2="86.5" stroke="#1a1a2e" stroke-width="0.9" opacity="0.6"/>
+      <line x1="75" y1="89"   x2="85" y2="89"   stroke="#1a1a2e" stroke-width="0.9" opacity="0.6"/>
+      <line x1="115" y1="86.5" x2="125" y2="86.5" stroke="#1a1a2e" stroke-width="0.9" opacity="0.6"/>
+      <line x1="115" y1="89"   x2="125" y2="89"   stroke="#1a1a2e" stroke-width="0.9" opacity="0.6"/>
+
+      <!-- Left arm (holding plane) -->
+      <ellipse cx="74" cy="100" rx="9" ry="16" fill="#1a1a2e" transform="rotate(12 74 100)"/>
+      <ellipse cx="68" cy="112" rx="8" ry="6" fill="#C8874A"/>
+      <circle cx="63" cy="112" r="2.5" fill="#D4904E"/>
+      <circle cx="67" cy="116" r="2.5" fill="#D4904E"/>
+      <circle cx="72" cy="116" r="2.5" fill="#D4904E"/>
+
+      <!-- Right arm — waving -->
+      <g id="waveArm">
+        <ellipse cx="128" cy="88" rx="9" ry="18" fill="#1a1a2e" transform="rotate(-35 128 88)"/>
+        <ellipse cx="142" cy="74" rx="9" ry="7" fill="#C8874A" transform="rotate(-35 142 74)"/>
+        <circle cx="149" cy="68" r="2.5" fill="#D4904E"/>
+        <circle cx="144" cy="64" r="2.5" fill="#D4904E"/>
+        <circle cx="139" cy="66" r="2.5" fill="#D4904E"/>
+      </g>
+
+      <!-- Legs dangling -->
+      <rect x="88"  y="116" width="12" height="18" rx="6" fill="#1a1a2e"/>
+      <ellipse cx="94"  cy="136" rx="7" ry="5" fill="#C8874A"/>
+      <rect x="100" y="116" width="12" height="18" rx="6" fill="#1a1a2e"/>
+      <ellipse cx="106" cy="136" rx="7" ry="5" fill="#C8874A"/>
+
+      <!-- Red scarf -->
+      <path d="M100 83 Q114 79 120 87 Q112 91 104 89 Q107 95 116 97 Q102 99 95 91 Z" fill="#FF385C" opacity="0.9"/>
+
+      <!-- Speed lines -->
+      <line x1="4"  y1="108" x2="18" y2="108" stroke="#DDD" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="2"  y1="115" x2="16" y2="115" stroke="#DDD" stroke-width="1"   stroke-linecap="round" opacity="0.5"/>
+      <line x1="6"  y1="122" x2="18" y2="122" stroke="#DDD" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- SPEECH BUBBLE -->
+  <div class="bubble-wrap">
+    <div class="speech-bubble" id="speechBubble">✈️ Ready for takeoff? Log in, Captain!</div>
+  </div>
+
+  <!-- CARD -->
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-logo">🌍 traveloop</div>
+      <div class="brand-tagline">Your personal travel co-pilot</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabLogin"  onclick="switchTab('login')">Log In</button>
+      <button class="tab"        id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="formLogin">
+      <div class="error-msg" id="loginError"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="captain@traveloop.com"
+          oninput="bearTyping()" onfocus="setBubble('📧 Email time! Let me peek... 👀')" onblur="bearIdle()"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••"
+          oninput="bearTyping()" onfocus="setBubble('🔐 Secret stuff! Not looking... 🙈')" onblur="bearIdle()"
+          onkeydown="if(event.key==='Enter') handleLogin()"/>
+      </div>
+      <a href="#" class="forgot"
+        onmouseover="setBubble('😅 Already forgot?? Classic pilot move!')"
+        onmouseout="resetBubble()">Forgot password?</a>
+      <button class="btn-main" id="loginBtn" onclick="handleLogin()"
+        onmouseenter="setBubble('🚀 Click it! Let\'s GO!')" onmouseleave="resetBubble()">
+        Log In ✈️
+      </button>
+      <div class="divider">or</div>
+      <button class="btn-google"
+        onmouseenter="setBubble('🌈 Ooh fancy! Google it is!')" onmouseleave="resetBubble()"
+        onclick="handleGoogleLogin()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" alt="G"/> Continue with Google
+      </button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="formSignup" style="display:none">
+      <div class="error-msg" id="signupError"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="signupFirst" placeholder="Alex"
+            oninput="bearTyping()" onfocus="setBubble('✏️ What\'s your name? I\'m Bruno!')" onblur="bearIdle()"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="signupLast" placeholder="Smith"
+            oninput="bearTyping()" onfocus="setBubble('🐾 Very official. Very pilot.')" onblur="bearIdle()"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="captain@traveloop.com"
+          oninput="bearTyping()" onfocus="setBubble('📬 Your digital address? Noted!')" onblur="bearIdle()"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signupPass" placeholder="••••••••"
+          oninput="checkStrength()" onfocus="setBubble('🔒 Make it strong! Like my coffee!')" onblur="bearIdle()"
+          onkeydown="if(event.key==='Enter') handleSignup()"/>
+        <div class="strength-bar">
+          <div class="strength-seg" id="s1"></div><div class="strength-seg" id="s2"></div>
+          <div class="strength-seg" id="s3"></div><div class="strength-seg" id="s4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel">Enter a password</div>
+      </div>
+      <button class="btn-main" id="signupBtn" onclick="handleSignup()"
+        onmouseenter="setBubble('🎉 SO CLOSE! Join the crew!')" onmouseleave="resetBubble()">
+        Create Account 🐾
+      </button>
+      <div class="divider">or</div>
+      <button class="btn-google"
+        onmouseenter="setBubble('Google? Quick & easy, like bear naps!')" onmouseleave="resetBubble()"
+        onclick="handleGoogleLogin()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" alt="G"/> Continue with Google
+      </button>
+    </div>
+  </div>
+
+  <div class="back-link"><a href="index.html">← Back to homepage</a></div>
+</div>
+
+<script>
+  // ===== REDIRECT IF ALREADY LOGGED IN =====
+  if (localStorage.getItem('tl_loggedIn') === 'true') {
+    window.location.href = 'index.html';
+  }
+
+  // ===== BACKGROUND =====
+  function generateStars() {
+    const c = document.getElementById('starsContainer');
+    for (let i = 0; i < 100; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const sz = Math.random() * 2.5 + 0.5;
+      s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;animation-delay:${Math.random()*4}s;`;
+      c.appendChild(s);
+    }
+  }
+  function generateFloaties() {
+    const icons = ['✈️','🌍','🗺️','🧳','🏔️','🌴','🏝️','🗼','⛵','🚂','🌊','🎒','🧭','🌺','⭐','🌙','🪐','🌈'];
+    const c = document.getElementById('floatiesContainer');
+    for (let i = 0; i < 20; i++) {
+      const f = document.createElement('div');
+      f.className = 'floaty';
+      f.textContent = icons[Math.floor(Math.random() * icons.length)];
+      f.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;font-size:${Math.random()*1.2+0.9}rem;animation-duration:${Math.random()*6+5}s;animation-delay:${Math.random()*8}s;`;
+      c.appendChild(f);
+    }
+  }
+  function generateShooters() {
+    const c = document.getElementById('shootersContainer');
+    for (let i = 0; i < 5; i++) {
+      const s = document.createElement('div');
+      s.className = 'shooter';
+      s.style.cssText = `left:${Math.random()*40}%;top:${Math.random()*60}%;animation-duration:${Math.random()*3+3}s;animation-delay:${Math.random()*10}s;width:${Math.random()*80+60}px;`;
+      c.appendChild(s);
+    }
+  }
+
+  // ===== MASCOT =====
+  const mascot = document.getElementById('mascotSvg');
+  function clearMascot() { mascot.className = 'mascot-svg'; }
+  function bearTyping()  { mascot.className = 'mascot-svg typing'; }
+  function bearIdle()    { clearMascot(); }
+  function bearExcited() { mascot.className = 'mascot-svg excited'; }
+  function bearDance()   {
+    mascot.className = 'mascot-svg happy';
+    setBubble('Wheee! I love dancing! ✈️🐻');
+    setTimeout(() => { clearMascot(); resetBubble(); }, 2500);
+  }
+
+  // ===== SPEECH BUBBLE =====
+  const msgs = [
+    '✈️ Ready for takeoff? Log in, Captain!',
+    '🐻 Hi! I\'m Bruno, your pilot bear!',
+    '🌍 Let\'s plan an adventure together!',
+    '🧳 Where are we flying today?',
+    '☁️ The sky\'s the limit with Traveloop!',
+  ];
+  let msgIdx = 0, bubbleTimer;
+
+  function setBubble(msg) {
+    clearTimeout(bubbleTimer);
+    const b = document.getElementById('speechBubble');
+    b.style.animation = 'none'; b.offsetHeight;
+    b.style.animation = 'bubbleIn 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+    b.textContent = msg;
+  }
+  function resetBubble() {
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(() => { setBubble(msgs[msgIdx++ % msgs.length]); bearIdle(); }, 400);
+  }
+  setInterval(() => {
+    if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+      setBubble(msgs[msgIdx++ % msgs.length]);
+    }
+  }, 5000);
+
+  // ===== TABS =====
+  function switchTab(tab) {
+    document.getElementById('formLogin').style.display  = tab === 'login'  ? 'block' : 'none';
+    document.getElementById('formSignup').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
+    document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
+    clearErrors();
+    if (tab === 'login')  { setBubble('🐻 Welcome back, Captain! Miss me?'); bearExcited(); setTimeout(clearMascot, 1500); }
+    else                  { setBubble('🎉 New crew member! Woohoo!');         bearExcited(); setTimeout(clearMascot, 1500); }
+  }
+
+  // ===== VALIDATION HELPERS =====
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.add('show');
+  }
+  function clearErrors() {
+    document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+  }
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  // ===== LOGIN =====
+  async function handleLogin() {
+
+  clearErrors();
+
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+
+  try {
+
+    const response = await fetch('http://127.0.0.1:8000/api/login/', {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        username: email,
+        password: pass
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      localStorage.setItem('tl_loggedIn', 'true');
+
+      localStorage.setItem('tl_user', JSON.stringify({
+        name: data.username,
+        initials: data.username[0].toUpperCase()
+      }));
+
+      alert('Login successful!');
+
+      window.location.href = 'index.html';
+
+    } else {
+
+      showError('loginError', data.error);
+
+    }
+
+  } catch (error) {
+
+    showError('loginError', 'Server error');
+
+  }
+}
+
+  // ===== SIGNUP =====
+  async function handleSignup() {
+  clearErrors();
+
+  const first = document.getElementById('signupFirst').value.trim();
+  const last = document.getElementById('signupLast').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPass').value.trim();
+
+  if (!first || !email || !pass) {
+    showError('signupError', 'Fill all required fields!');
+    return;
+  }
+
+  try {
+
+    const response = await fetch('http://127.0.0.1:8000/api/signup/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        username: email,
+        email: email,
+        password: pass
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      alert('Account created successfully!');
+      switchTab('login');
+
+    } else {
+
+      showError('signupError', data.error);
+
+    }
+
+  } catch (error) {
+
+    showError('signupError', 'Server error');
+
+  }
+}
+
+  // ===== GOOGLE (DEMO) =====
+  function handleGoogleLogin() {
+    bearExcited();
+    setBubble('🌈 Connecting to Google... brrrr!');
+    setTimeout(() => {
+      const user = { name: 'Google User', email: 'google@traveloop.com', initials: 'G' };
+      localStorage.setItem('tl_loggedIn', 'true');
+      localStorage.setItem('tl_user', JSON.stringify(user));
+      confettiBurst();
+      setBubble('🎉 Google login success!');
+      setTimeout(() => { window.location.href = 'index.html'; }, 900);
+    }, 1200);
+  }
+
+  // ===== PASSWORD STRENGTH =====
+  function checkStrength() {
+    bearTyping();
+    const p = document.getElementById('signupPass').value;
+    const segs = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
+    const lbl  = document.getElementById('strengthLabel');
+    let score  = 0;
+    if (p.length >= 6)  score++;
+    if (p.length >= 10) score++;
+    if (/[A-Z]/.test(p) && /[0-9]/.test(p)) score++;
+    if (/[^A-Za-z0-9]/.test(p)) score++;
+    const colors  = ['#FF385C','#FF9500','#FFCC00','#34C759'];
+    const labels  = ['Too weak 😬','Getting there 🤔','Pretty good! 😊','Super strong! 💪'];
+    const bubbles = ['😬 Weaker than my wings!','🤔 Getting there!','😎 Nice pilot password!','💪 UNBREAKABLE! Like my love for honey!'];
+    segs.forEach((s, i) => { s.style.background = i < score ? colors[score-1] : '#eee'; });
+    if (p.length > 0) { lbl.textContent = labels[score-1] || labels[0]; setBubble(bubbles[score-1] || bubbles[0]); }
+    else lbl.textContent = 'Enter a password';
+  }
+
+  // ===== CONFETTI =====
+  function confettiBurst() {
+    const colors = ['#FF385C','#FFD700','#6C63FF','#00D2FF','#FF9500','#34C759','#FF6B9D'];
+    for (let i = 0; i < 45; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.cssText = `left:${35+Math.random()*30}%;top:${15+Math.random()*25}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${Math.random()*10+5}px;height:${Math.random()*10+5}px;border-radius:${Math.random()>0.5?'50%':'3px'};animation-delay:${Math.random()*0.4}s;animation-duration:${Math.random()*0.8+0.8}s;transform:translateX(${(Math.random()-0.5)*220}px);`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2200);
+    }
+  }
+
+  // ===== INIT =====
+  generateStars();
+  generateFloaties();
+  generateShooters();
+</script>
+</body>
+</html>
