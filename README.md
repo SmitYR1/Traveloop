@@ -119,7 +119,7 @@ Traveloop now includes a fully functional backend authentication system powered 
 ## Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/traveloop.git
+git clone https://github.com/SmitYR1/traveloop.git
 cd traveloop
 ```
 
